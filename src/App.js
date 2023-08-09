@@ -1,11 +1,14 @@
 import {useState, useEffect} from 'react'
 import Gallery from './components/Gallery';
 import SearchBar from './components/SearchBar';
+import { DataContext } from './context/DataContext'
+
 function App() {
   let [message, setMessage] = useState('Seach for music')
   let [search, setSearch] = useState('')
   let [data, setData] = useState([])
   const API_URL = 'https://itunes.apple.com/search?term='
+
   useEffect(()=>{
     if(search){
     const fetchData = async () => {
@@ -21,16 +24,21 @@ function App() {
     fetchData()
     }
   }, [search])
+
   const handleSearch = (e, term) => {
     e.preventDefault();
     setSearch(term)
   }
+
   return (
     <div className="App">
       <SearchBar handleSearch={handleSearch}/>
       {message}
-      <Gallery data={data}/>
+      <DataContext.Provider value={data}>
+      <Gallery/>
+      </DataContext.Provider>
     </div>
   );
 }
+
 export default App;
