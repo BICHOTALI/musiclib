@@ -2,10 +2,11 @@ import { useEffect, useState, Suspense } from 'react'
 import Gallery from './components/Gallery';
 import SearchBar from './components/SearchBar';
 import { createResource as fetchData } from './helper';
+import Spinner from './components/Spinner';
 
 function App() {
   let [message, setMessage] = useState('Seach for music')
-  let [search, setSearch] = useState('')
+  let [searchTerm, setSearch] = useState('')
   let [data, setData] = useState(null)
   
   useEffect(() => {
@@ -18,15 +19,25 @@ function App() {
     e.preventDefault();
     setSearch(term)
   }
+
+  const renderGallery = () => {
+    if(data){
+        return (
+            <Suspense fallback={<Spinner/>}>
+                <Gallery data={data} />
+            </Suspense>
+        )
+    }
+  }
+
+
   return (
     <div className="App">
         <SearchBar handleSearch={handleSearch} />
         {message}
-        <Suspense fallback={<h1>Loading...</h1>}>
-            // <Gallery data={data} />
-        </Suspense>
+        {renderGallery()}
     </div>
-)
+  )
 
 }
 export default App;
