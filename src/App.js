@@ -1,46 +1,52 @@
-import {useState, useEffect, Fragment} from 'react'
+import { useEffect, useState, Suspense , Fragment} from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Gallery from './components/Gallery';
 import SearchBar from './components/SearchBar';
 import ArtistView from './components/ArtistView';
 import AlbumView from './components/AlbumView';
 
+import { createResource as fetchData } from './helper';
+import Spinner from './components/Spinner';
+
 function App() {
   let [message, setMessage] = useState('Seach for music')
-  let [search, setSearch] = useState('')
-  let [data, setData] = useState([])
-  const API_URL = 'https://itunes.apple.com/search?term='
-
-  useEffect(()=>{
-    if(search){
-    const fetchData = async () => {
-      document.title = `${search} music`
-      const response = await fetch(API_URL + search)
-      const resData = await response.json()
-      if(resData.results.length > 0){
-        setData(resData.results)
-      }else{
-        setMessage('Not Found')
-      }
-    }
-    fetchData()
-    }
-  }, [search])
+  let [searchTerm, setSearch] = useState('')
+  let [data, setData] = useState(null)
   
+
+  useEffect(() => {
+    if (searchTerm) {
+        setData(fetchData(searchTerm))
+    }
+}, [searchTerm])
+  
+
   const handleSearch = (e, term) => {
     e.preventDefault();
     setSearch(term)
   }
 
+
+  const renderGallery = () => {
+    if(data){
+        return (
+            <Suspense fallback={<Spinner/>}>
+                <Gallery data={data} />
+            </Suspense>
+        )
+    }
+  }
+
+
   return (
-    <div>
-    {message}
+    <div className="App">
+        {message}
         <Router>
             <Routes>
                 <Route path="/" element={
                     <Fragment>
                         <SearchBar handleSearch = {handleSearch}/>
-                        <Gallery data={data} />
+                        {renderGallery()}
                     </Fragment>
                 } />
                 <Route path="/album/:id" element={<AlbumView />} />
@@ -48,7 +54,6 @@ function App() {
             </Routes>
         </Router>
     </div>
-  )
-
+  );
 }
 export default App;
